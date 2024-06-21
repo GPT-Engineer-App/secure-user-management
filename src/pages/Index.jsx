@@ -10,6 +10,18 @@ const Index = () => {
   const [conversionResult, setConversionResult] = useState(null);
   const [currency, setCurrency] = useState("USD");
   const [conversionRates, setConversionRates] = useState({});
+  const [sourceBank, setSourceBank] = useState("");
+  const [destinationBank, setDestinationBank] = useState("");
+
+  const banks = [
+    "Standard Bank",
+    "Capitec",
+    "FNB",
+    "All American Banks",
+    "All European Banks",
+    "All Australian Banks",
+    "Worldwide Banks"
+  ];
 
   useEffect(() => {
     // Fetch conversion rates
@@ -26,8 +38,8 @@ const Index = () => {
   }, []);
 
   const validateVoucherDetails = () => {
-    if (!voucherCode || !amount) {
-      setError("Both voucher code and amount are required.");
+    if (!voucherCode || !amount || !sourceBank || !destinationBank) {
+      setError("All fields are required.");
       return false;
     }
     if (isNaN(amount) || amount <= 0) {
@@ -48,6 +60,8 @@ const Index = () => {
       const response = await axios.post("https://api.examplebank.com/validate-voucher", {
         voucherCode: encryptedVoucherCode,
         amount: encryptedAmount,
+        sourceBank: sourceBank,
+        destinationBank: destinationBank
       });
 
       if (response.data.valid) {
@@ -55,6 +69,8 @@ const Index = () => {
           voucherCode: encryptedVoucherCode,
           amount: encryptedAmount,
           currency: currency,
+          sourceBank: sourceBank,
+          destinationBank: destinationBank
         });
 
         const convertedAmount = conversionResponse.data.convertedAmount * conversionRates[currency];
@@ -83,6 +99,24 @@ const Index = () => {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+          <FormLabel>Source Bank</FormLabel>
+          <Select value={sourceBank} onChange={(e) => setSourceBank(e.target.value)}>
+            <option value="" disabled>Select source bank</option>
+            {banks.map((bank, index) => (
+              <option key={index} value={bank}>
+                {bank}
+              </option>
+            ))}
+          </Select>
+          <FormLabel>Destination Bank</FormLabel>
+          <Select value={destinationBank} onChange={(e) => setDestinationBank(e.target.value)}>
+            <option value="" disabled>Select destination bank</option>
+            {banks.map((bank, index) => (
+              <option key={index} value={bank}>
+                {bank}
+              </option>
+            ))}
+          </Select>
           <FormLabel>Currency</FormLabel>
           <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
             {Object.keys(conversionRates).map((currencyCode) => (
