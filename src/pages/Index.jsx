@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Container, VStack, Input, Button, Text, FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
+import CryptoJS from "crypto-js";
 
 const Index = () => {
   const [voucherCode, setVoucherCode] = useState("");
@@ -25,15 +26,18 @@ const Index = () => {
     if (!validateVoucherDetails()) return;
 
     try {
+      const encryptedVoucherCode = CryptoJS.AES.encrypt(voucherCode, 'secret-key').toString();
+      const encryptedAmount = CryptoJS.AES.encrypt(amount, 'secret-key').toString();
+
       const response = await axios.post("https://api.examplebank.com/validate-voucher", {
-        voucherCode,
-        amount,
+        voucherCode: encryptedVoucherCode,
+        amount: encryptedAmount,
       });
 
       if (response.data.valid) {
         const conversionResponse = await axios.post("https://api.examplebank.com/convert-voucher", {
-          voucherCode,
-          amount,
+          voucherCode: encryptedVoucherCode,
+          amount: encryptedAmount,
         });
 
         setConversionResult(`Converted Amount: $${conversionResponse.data.convertedAmount.toFixed(2)}`);

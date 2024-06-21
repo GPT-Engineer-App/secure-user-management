@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CryptoJS from "crypto-js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { Container, VStack, Input, Button, Text, FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
@@ -13,7 +14,10 @@ const Register = () => {
     setError("");
     setSuccess("");
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const encryptedEmail = CryptoJS.AES.encrypt(email, 'secret-key').toString();
+      const encryptedPassword = CryptoJS.AES.encrypt(password, 'secret-key').toString();
+
+      const userCredential = await createUserWithEmailAndPassword(auth, encryptedEmail, encryptedPassword);
       setSuccess("User registered successfully!");
     } catch (error) {
       setError(error.message);

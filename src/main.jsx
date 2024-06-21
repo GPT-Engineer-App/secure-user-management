@@ -20,3 +20,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ChakraProvider>
   </React.StrictMode>
 );
+
+if (import.meta.env.MODE === 'development') {
+  console.log('Running in development mode');
+  // Add any development-specific code here
+}
