@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { Container, VStack, Input, Button, Text, FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
+import { Container, VStack, Input, Button, Text, FormControl, FormLabel, FormErrorMessage, Select } from "@chakra-ui/react";
 import CryptoJS from "crypto-js";
 
 const Index = () => {
@@ -8,6 +8,22 @@ const Index = () => {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [conversionResult, setConversionResult] = useState(null);
+  const [currency, setCurrency] = useState("USD");
+  const [conversionRates, setConversionRates] = useState({});
+
+  useEffect(() => {
+    // Fetch conversion rates
+    const fetchConversionRates = async () => {
+      try {
+        const response = await axios.get("https://api.exchangerate-api.com/v4/latest/USD");
+        setConversionRates(response.data.rates);
+      } catch (error) {
+        setError("Failed to fetch conversion rates.");
+      }
+    };
+
+    fetchConversionRates();
+  }, []);
 
   const validateVoucherDetails = () => {
     if (!voucherCode || !amount) {
@@ -38,9 +54,11 @@ const Index = () => {
         const conversionResponse = await axios.post("https://api.examplebank.com/convert-voucher", {
           voucherCode: encryptedVoucherCode,
           amount: encryptedAmount,
+          currency: currency,
         });
 
-        setConversionResult(`Converted Amount: $${conversionResponse.data.convertedAmount.toFixed(2)}`);
+        const convertedAmount = conversionResponse.data.convertedAmount * conversionRates[currency];
+        setConversionResult(`Converted Amount: ${currency} ${convertedAmount.toFixed(2)}`);
       } else {
         setError("Invalid voucher code or amount.");
       }
@@ -65,6 +83,14 @@ const Index = () => {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+          <FormLabel>Currency</FormLabel>
+          <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+            {Object.keys(conversionRates).map((currencyCode) => (
+              <option key={currencyCode} value={currencyCode}>
+                {currencyCode}
+              </option>
+            ))}
+          </Select>
           {error && <FormErrorMessage>{error}</FormErrorMessage>}
         </FormControl>
         <Button colorScheme="blue" onClick={handleConversion}>Convert Voucher</Button>
