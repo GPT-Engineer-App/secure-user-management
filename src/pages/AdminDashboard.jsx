@@ -11,16 +11,16 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Fetch user activities
-    axios.get("/api/user-activities").then((response) => setUserActivities(response.data));
+    axios.get("/api/user-activities").then((response) => setUserActivities(response.data)).catch((error) => console.error("Error fetching user activities:", error));
 
     // Fetch user accounts
-    axios.get("/api/user-accounts").then((response) => setUserAccounts(response.data));
+    axios.get("/api/user-accounts").then((response) => setUserAccounts(response.data)).catch((error) => console.error("Error fetching user accounts:", error));
 
     // Fetch system performance
-    axios.get("/api/system-performance").then((response) => setSystemPerformance(response.data));
+    axios.get("/api/system-performance").then((response) => setSystemPerformance(response.data)).catch((error) => console.error("Error fetching system performance:", error));
 
     // Fetch logs
-    axios.get("/api/logs").then((response) => setLogs(response.data));
+    axios.get("/api/logs").then((response) => setLogs(response.data)).catch((error) => console.error("Error fetching logs:", error));
   }, []);
 
   return (
