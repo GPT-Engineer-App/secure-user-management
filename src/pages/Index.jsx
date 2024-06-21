@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { Container, VStack, Input, Button, Text, FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
 
 const Index = () => {
@@ -20,14 +21,28 @@ const Index = () => {
     return true;
   };
 
-  const handleConversion = () => {
+  const handleConversion = async () => {
     if (!validateVoucherDetails()) return;
 
-    // Conversion logic (for demonstration purposes, we'll just multiply the amount by a fixed rate)
-    const conversionRate = 1.2; // Example conversion rate
-    const convertedAmount = amount * conversionRate;
+    try {
+      const response = await axios.post("https://api.examplebank.com/validate-voucher", {
+        voucherCode,
+        amount,
+      });
 
-    setConversionResult(`Converted Amount: $${convertedAmount.toFixed(2)}`);
+      if (response.data.valid) {
+        const conversionResponse = await axios.post("https://api.examplebank.com/convert-voucher", {
+          voucherCode,
+          amount,
+        });
+
+        setConversionResult(`Converted Amount: $${conversionResponse.data.convertedAmount.toFixed(2)}`);
+      } else {
+        setError("Invalid voucher code or amount.");
+      }
+    } catch (error) {
+      setError("An error occurred while processing the voucher.");
+    }
   };
 
   return (
